@@ -92,12 +92,12 @@ func open(ctx context.Context, cfg Config, rt http.RoundTripper) (*Backend, erro
 	}
 
 	// assume role
-	roleArn := os.Getenv("RESTIC_ASSUME_ROLE_ARN")
+	roleArn := os.Getenv("AWS_ASSUME_ROLE_ARN")
 	if roleArn != "" {
-		regionName := os.Getenv("RESTIC_ASSUME_ROLE_REGION")
-		sessionName := os.Getenv("RESTIC_ASSUME_ROLE_SESSION_NAME")
-		externalId := os.Getenv("RESTIC_ASSUME_ROLE_EXTERNAL_ID")
-		policy := os.Getenv("RESTIC_ASSUME_ROLE_POLICY")
+		regionName := os.Getenv("AWS_ASSUME_ROLE_REGION")
+		sessionName := os.Getenv("AWS_ASSUME_ROLE_SESSION_NAME")
+		externalId := os.Getenv("AWS_ASSUME_ROLE_EXTERNAL_ID")
+		policy := os.Getenv("AWS_ASSUME_ROLE_POLICY")
 
 		awsConfig := aws.NewConfig()
 		awsConfig.Region = "us-east-1"
