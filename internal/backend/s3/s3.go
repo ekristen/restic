@@ -97,6 +97,7 @@ func open(ctx context.Context, cfg Config, rt http.RoundTripper) (*Backend, erro
 		regionName := os.Getenv("S3_ASSUME_ROLE_REGION")
 		sessionName := os.Getenv("S3_ASSUME_ROLE_SESSION_NAME")
 		externalId := os.Getenv("S3_ASSUME_ROLE_EXTERNAL_ID")
+		policy := os.Getenv("S3_ASSUME_ROLE_POLICY")
 
 		awsConfig := aws.NewConfig()
 		awsConfig.Region = "us-east-1"
@@ -116,6 +117,9 @@ func open(ctx context.Context, cfg Config, rt http.RoundTripper) (*Backend, erro
 		}
 		if externalId != "" {
 			stsInput.ExternalId = aws.String(externalId)
+		}
+		if policy != "" {
+			stsInput.Policy = aws.String(policy)
 		}
 
 		ar, stsErr := stsClient.AssumeRole(ctx, stsInput, func(o *sts.Options) {
