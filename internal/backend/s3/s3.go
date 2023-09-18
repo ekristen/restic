@@ -18,6 +18,10 @@ import (
 	"github.com/restic/restic/internal/debug"
 	"github.com/restic/restic/internal/errors"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -85,6 +89,47 @@ func open(ctx context.Context, cfg Config, rt http.RoundTripper) (*Backend, erro
 
 	if c.SignerType == credentials.SignatureAnonymous {
 		debug.Log("using anonymous access for %#v", cfg.Endpoint)
+	}
+
+	// assume role
+	roleArn := os.Getenv("S3_ASSUME_ROLE_ARN")
+	if roleArn != "" {
+		regionName := os.Getenv("S3_ASSUME_ROLE_REGION")
+		sessionName := os.Getenv("S3_ASSUME_ROLE_SESSION_NAME")
+		externalId := os.Getenv("S3_ASSUME_ROLE_EXTERNAL_ID")
+
+		awsConfig := aws.NewConfig()
+		awsConfig.Region = "us-east-1"
+		if cfg.Region != "" {
+			awsConfig.Region = cfg.Region
+		}
+		if regionName != "" {
+			awsConfig.Region = regionName
+		}
+
+		stsClient := sts.NewFromConfig(awsConfig.Copy())
+		stsInput := &sts.AssumeRoleInput{
+			RoleArn: aws.String(roleArn),
+		}
+		if sessionName != "" {
+			stsInput.RoleSessionName = aws.String(sessionName)
+		}
+		if externalId != "" {
+			stsInput.ExternalId = aws.String(externalId)
+		}
+
+		ar, stsErr := stsClient.AssumeRole(ctx, stsInput, func(o *sts.Options) {
+			o.Credentials = awscreds.NewStaticCredentialsProvider(c.AccessKeyID, c.SecretAccessKey, c.SessionToken)
+		})
+		if stsErr != nil {
+			return nil, errors.Wrap(stsErr, "creds.AssumeRole")
+		}
+
+		creds = credentials.NewStaticV2(
+			aws.ToString(ar.Credentials.AccessKeyId),
+			aws.ToString(ar.Credentials.SecretAccessKey),
+			aws.ToString(ar.Credentials.SessionToken),
+		)
 	}
 
 	options := &minio.Options{
