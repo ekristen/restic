@@ -110,7 +110,8 @@ func open(ctx context.Context, cfg Config, rt http.RoundTripper) (*Backend, erro
 
 		stsClient := sts.NewFromConfig(awsConfig.Copy())
 		stsInput := &sts.AssumeRoleInput{
-			RoleArn: aws.String(roleArn),
+			RoleArn:         aws.String(roleArn),
+			RoleSessionName: aws.String("restic"),
 		}
 		if sessionName != "" {
 			stsInput.RoleSessionName = aws.String(sessionName)
