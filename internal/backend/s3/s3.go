@@ -18,10 +18,6 @@ import (
 	"github.com/restic/restic/internal/debug"
 	"github.com/restic/restic/internal/errors"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -94,47 +90,48 @@ func open(ctx context.Context, cfg Config, rt http.RoundTripper) (*Backend, erro
 	// assume role
 	roleArn := os.Getenv("AWS_ASSUME_ROLE_ARN")
 	if roleArn != "" {
-		regionName := os.Getenv("AWS_ASSUME_ROLE_REGION")
 		sessionName := os.Getenv("AWS_ASSUME_ROLE_SESSION_NAME")
-		externalId := os.Getenv("AWS_ASSUME_ROLE_EXTERNAL_ID")
+		externalID := os.Getenv("AWS_ASSUME_ROLE_EXTERNAL_ID")
 		policy := os.Getenv("AWS_ASSUME_ROLE_POLICY")
+		stsEndpoint := os.Getenv("AWS_ASSUME_ROLE_STS_ENDPOINT")
 
-		awsConfig := aws.NewConfig()
-		awsConfig.Region = "us-east-1"
-		if cfg.Region != "" {
-			awsConfig.Region = cfg.Region
-		}
-		if regionName != "" {
-			awsConfig.Region = regionName
+		if stsEndpoint == "" {
+			if len(os.Getenv("AWS_REGION")) > 0 {
+				if strings.HasPrefix(os.Getenv("AWS_REGION"), "cn-") {
+					stsEndpoint = "https://sts." + os.Getenv("AWS_REGION") + ".amazonaws.com.cn"
+				} else {
+					stsEndpoint = "https://sts." + os.Getenv("AWS_REGION") + ".amazonaws.com"
+				}
+			} else {
+				stsEndpoint = "https://sts.amazonaws.com"
+			}
 		}
 
-		stsClient := sts.NewFromConfig(awsConfig.Copy())
-		stsInput := &sts.AssumeRoleInput{
-			RoleArn:         aws.String(roleArn),
-			RoleSessionName: aws.String("restic"),
+		opts := credentials.STSAssumeRoleOptions{
+			RoleARN:   roleArn,
+			AccessKey: c.AccessKeyID,
+			SecretKey: c.SecretAccessKey,
+		}
+		if c.SessionToken != "" {
+			opts.SessionToken = c.SessionToken
 		}
 		if sessionName != "" {
-			stsInput.RoleSessionName = aws.String(sessionName)
+			opts.RoleSessionName = sessionName
 		}
-		if externalId != "" {
-			stsInput.ExternalId = aws.String(externalId)
+		if externalID != "" {
+			opts.ExternalID = externalID
 		}
 		if policy != "" {
-			stsInput.Policy = aws.String(policy)
+			opts.Policy = policy
+		}
+		if len(os.Getenv("AWS_REGION")) > 0 {
+			opts.Location = os.Getenv("AWS_REGION")
 		}
 
-		ar, stsErr := stsClient.AssumeRole(ctx, stsInput, func(o *sts.Options) {
-			o.Credentials = awscreds.NewStaticCredentialsProvider(c.AccessKeyID, c.SecretAccessKey, c.SessionToken)
-		})
-		if stsErr != nil {
-			return nil, errors.Wrap(stsErr, "creds.AssumeRole")
+		creds, err = credentials.NewSTSAssumeRole(stsEndpoint, opts)
+		if err != nil {
+			return nil, errors.Wrap(err, "creds.AssumeRole")
 		}
-
-		creds = credentials.NewStaticV2(
-			aws.ToString(ar.Credentials.AccessKeyId),
-			aws.ToString(ar.Credentials.SecretAccessKey),
-			aws.ToString(ar.Credentials.SessionToken),
-		)
 	}
 
 	options := &minio.Options{
