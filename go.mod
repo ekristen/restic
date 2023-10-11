@@ -10,11 +10,13 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/cespare/xxhash/v2 v2.2.0
 	github.com/elithrar/simple-scrypt v1.3.0
-	github.com/go-ole/go-ole v1.3.0
-	github.com/google/go-cmp v0.6.0
-	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/klauspost/compress v1.17.2
-	github.com/minio/minio-go/v7 v7.0.63
+	github.com/go-ole/go-ole v1.2.6
+	github.com/google/go-cmp v0.5.9
+	github.com/hashicorp/golang-lru/v2 v2.0.6
+	github.com/juju/ratelimit v1.0.2
+	github.com/klauspost/compress v1.16.7
+	github.com/kurin/blazer v0.5.4-0.20230113224640-3887e1ec64b5
+	github.com/minio/minio-go/v7 v7.0.64-0.20231011231021-4c868ef0690c
 	github.com/minio/sha256-simd v1.0.1
 	github.com/ncw/swift/v2 v2.0.2
 	github.com/pkg/errors v0.9.1
@@ -80,5 +82,3 @@ require (
 )
 
 go 1.18
-
-replace github.com/minio/minio-go/v7 v7.0.61 => github.com/ekristen/minio-go/v7 v7.0.0-20230928203854-0c00fd6963c8
