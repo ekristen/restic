@@ -133,19 +133,19 @@ func getCredentials(cfg Config) (*credentials.Credentials, error) {
 		debug.Log("using anonymous access for %#v", cfg.Endpoint)
 	}
 
-	roleArn := os.Getenv("AWS_ASSUME_ROLE_ARN")
+	roleArn := os.Getenv("RESTIC_AWS_ASSUME_ROLE_ARN")
 	if roleArn != "" {
 		// use the region provided by the configuration by default
 		awsRegion := cfg.Region
 		// allow the region to be overridden if for some reason it is required
-		if len(os.Getenv("AWS_ASSUME_ROLE_REGION")) > 0 {
-			awsRegion = os.Getenv("AWS_ASSUME_ROLE_REGION")
+		if len(os.Getenv("RESTIC_AWS_ASSUME_ROLE_REGION")) > 0 {
+			awsRegion = os.Getenv("RESTIC_AWS_ASSUME_ROLE_REGION")
 		}
 
-		sessionName := os.Getenv("AWS_ASSUME_ROLE_SESSION_NAME")
-		externalID := os.Getenv("AWS_ASSUME_ROLE_EXTERNAL_ID")
-		policy := os.Getenv("AWS_ASSUME_ROLE_POLICY")
-		stsEndpoint := os.Getenv("AWS_ASSUME_ROLE_STS_ENDPOINT")
+		sessionName := os.Getenv("RESTIC_AWS_ASSUME_ROLE_SESSION_NAME")
+		externalID := os.Getenv("RESTIC_AWS_ASSUME_ROLE_EXTERNAL_ID")
+		policy := os.Getenv("RESTIC_AWS_ASSUME_ROLE_POLICY")
+		stsEndpoint := os.Getenv("RESTIC_AWS_ASSUME_ROLE_STS_ENDPOINT")
 
 		if stsEndpoint == "" {
 			if len(awsRegion) > 0 {

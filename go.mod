@@ -16,7 +16,7 @@ require (
 	github.com/juju/ratelimit v1.0.2
 	github.com/klauspost/compress v1.16.7
 	github.com/kurin/blazer v0.5.4-0.20230113224640-3887e1ec64b5
-	github.com/minio/minio-go/v7 v7.0.64-0.20231011231021-4c868ef0690c
+	github.com/minio/minio-go/v7 v7.0.64
 	github.com/minio/sha256-simd v1.0.1
 	github.com/ncw/swift/v2 v2.0.2
 	github.com/pkg/errors v0.9.1
@@ -26,16 +26,14 @@ require (
 	github.com/restic/chunker v0.4.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
-	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/crypto v0.14.0
 	golang.org/x/net v0.17.0
-	golang.org/x/oauth2 v0.13.0
-	golang.org/x/sync v0.4.0
+	golang.org/x/oauth2 v0.11.0
+	golang.org/x/sync v0.3.0
 	golang.org/x/sys v0.13.0
 	golang.org/x/term v0.13.0
 	golang.org/x/text v0.13.0
-	golang.org/x/time v0.3.0
-	google.golang.org/api v0.149.0
+	google.golang.org/api v0.138.0
 )
 
 require (
